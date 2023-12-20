@@ -1,65 +1,20 @@
-import requests
-import hashlib
-import sys
-import os
+import requests 
+import hashlib 
 
-def request_api_data(query):
-    url = 'https://api.pwnedpasswords.com/range/' + query
-    res = requests.get(url)
-    if res.status_code != 200:
-        raise RuntimeError(f'Error fetching {res.status_code}, check the API and try again')
-    return res
+def api_get_request_connection(query):
+	url = "https://api.pwnedpasswords.com/range/" + query 
+	res = requests.get(url) 
+	if res.status_code != 200: 
+		raise RuntimeError(f'this seems to be a bad gateway with the webpage, {res.status_code}, so please try again.') 
+	return res 
 
-def read_responses(response):
-    print(response.text)
-    # Use it to know how many hash matches!
-
-def get_password_leaks_count(hashes, hash_to_check):
-    hashes = (line.split(':') for line in hashes.text.splitlines())
-    for h, count in hashes:
-        if h == hash_to_check:
-            return count
-    return 0
-
-def pwned_api_check(password):
-    sha1password = hashlib.sha1(password.encode('utf-8')).hexdigest().upper()
-    first5_chars, tail = sha1password[:5], sha1password[5:]
-    response = request_api_data(first5_chars)
-    return get_password_leaks_count(response, tail)
-
-def main():
-    password = input("Enter the password to check: ")
-    count = pwned_api_check(password)
-    if count:
-        print(f'This password has been found {count} times. It is not safe!')
-    else:
-        print('This password has not been found. It is safe!')
-
-if __name__ == "__main__":
-    main()
+def check_password_hash_api(password):
+	sha1password=hashlib.sha1(password.encode('utf-8')).hexdigest().upper() 
+	head,tail = sha1password[:5],sha1password[:5]
+	print(head,tail) 
+	response=api_get_request_connection(head) 
+	print(response) 
+	return response
 
 
-
-
-def pwned_api_check(password):
-    sha1passwd= hashlib.sha1(password.encode('utf-8')).hexdigest().upper() 
-    first5_char,tail = sha1passwd[:5],sha1passwd[5:]
-    print(first5_char,tail)
-    response = request_api_data(first5_char)
-    print(response)
-    return get_password_leaks_count(response, tail)
-
-
-
-def main(args):
-    for password in args:
-        count = pwned_api_check(password) 
-        if count :
-            print(f'{password} was found {count} times.... you should probably change your password!')
-        else:
-            print(f'{password} was not found! you password was not pwned!')
-        return 'done!' 
-
-
- 
-main(sys.argv[1:]) 
+check_password_hash_api("password123")
